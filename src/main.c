@@ -3,16 +3,7 @@
 
 #define READ_BUFF_SIZE	1024
 
-enum lll_token_type
-{
-	LLL_WORD
-};
-
-typedef struct
-{
-	enum lll_token_type type;
-	lll_slice			data;
-}	lll_token;
+typedef lll_string	lll_token;
 
 static char		read_buff[READ_BUFF_SIZE];
 static lll_string	user_input = {read_buff, 0};
@@ -56,15 +47,14 @@ lll_b8	lll_tokenize(lll_string* input, lll_token* output)
 	{
 		if (*string.data == lookup_target)
 		{
-			output->type = LLL_WORD;
-			output->data.data = start;
+			output->data = start;
 			if ((lookup_target == '\'') || (lookup_target == '"'))
 			{
-				output->data.length = i;
+				output->length = i;
 			}
 			else
 			{
-				output->data.length = i + 1;
+				output->length = i + 1;
 			}
 			string.data++;
 			break;
@@ -75,9 +65,8 @@ lll_b8	lll_tokenize(lll_string* input, lll_token* output)
 	{
 		if (lookup_target == ' ')
 		{
-			output->type = LLL_WORD;
-			output->data.data = start;
-			output->data.length = i;
+			output->data = start;
+			output->length = i;
 		}
 		else
 		{
@@ -112,7 +101,7 @@ int main(void)
 		user_input.length = index;
 		while (lll_tokenize(&user_input, &token))
 		{
-			(void) !write(STDOUT_FILENO, token.data.data, token.data.length);
+			(void) !write(STDOUT_FILENO, token.data, token.length);
 			(void) !write(STDOUT_FILENO, "\n", 1);
 		}
 		user_input.data = read_buff;
