@@ -423,6 +423,46 @@ no_flags:
 	return (buffer_memory - buffer.data);
 }
 
+void	lll_sprintf_test()
+{
+	char		buffer[1024];
+	lll_string	string = {buffer, 1024};
+	lll_u32		length;
+	// Note: format d
+	length = lll_sprintf(string, "front[%d]after\n", 1234);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%d]after\n", -1234);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%bd]after\n", -1234);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%xd]after\n", -1234);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%xbd]after\n", -1234);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf((lll_string){buffer, 3}, "%d]after\n", 1234);
+	write(STDOUT_FILENO, buffer, length);
+	// Note: format u
+	length = lll_sprintf(string, "front[%u]after\n", 2234567);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%u]after\n", 2234567);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%bu]after\n", 2234567);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%xu]after\n", 2234567);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%bxu]after\n", 2234567);
+	write(STDOUT_FILENO, buffer, length);
+	// Note: format p
+	length = lll_sprintf(string, "front[%p]after\n", &length);
+	write(STDOUT_FILENO, buffer, length);
+	// Note: format s
+	length = lll_sprintf(string, "front[%s]after\n", "what the actual fuck");
+	write(STDOUT_FILENO, buffer, length);
+	// Note: format c
+	length = lll_sprintf(string, "front[%c]after\n", 'a');
+	write(STDOUT_FILENO, buffer, length);
+}
+
 lll_b8	lll_tokenize(lll_string* input, lll_token* output)
 {
 	lll_string string = *input;
@@ -482,6 +522,7 @@ lll_b8	lll_tokenize(lll_string* input, lll_token* output)
 
 int main(void)
 {
+	lll_sprintf_test();
 	lll_b8		quit = LLL_FALSE;
 	lll_token	token;
 	static char	buff[1024];
