@@ -102,3 +102,38 @@ void	lll_arena_rollback(lll_arena* arena, lll_arena_snapshot snapshot)
 	arena->used = snapshot;
 }
 
+void	lll_ht_init(lll_ht*	hashtable,
+					lll_u32	entry_size,
+					lll_u32	capacity,
+					lll_arena* arena)
+{
+	lll_arena_split(arena, entry_size * capacity, &hashtable->entries);
+	hashtable->entry_size = entry_size;
+}
+
+void*	lll_ht_set(lll_ht* hashtable,
+				   lll_string key,
+				   void* value)
+{
+	(void) hashtable;
+	(void) key;
+	(void) value;
+	return NULL;
+}
+
+void*	lll_ht_get(lll_ht* hashtable,
+				   lll_string key)
+{
+	(void) hashtable;
+	(void) key;
+	return NULL;
+}
+
+void*	lll_ht_remove(lll_ht* hashtable,
+					  lll_string key)
+{
+	(void) hashtable;
+	(void) key;
+	return NULL;
+}
+
