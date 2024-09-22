@@ -12,6 +12,11 @@ typedef char			lll_i8;
 typedef unsigned char	lll_b8;
 typedef unsigned char	lll_u8;
 typedef long			lll_u64;
+#ifdef LLL_32_BIT_POINTER
+typedef lll_u32			lll_ptr;
+#else
+typedef lll_u64			lll_ptr;
+#endif
 
 typedef char*	lll_va_list;
 #define lll_va_start(arg) ((lll_va_list) &arg + (sizeof(arg) << 3))

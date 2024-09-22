@@ -8,6 +8,17 @@ typedef lll_string	lll_token;
 static char		read_buff[READ_BUFF_SIZE];
 static lll_string	user_input = {read_buff, 0};
 
+lll_u32	lll_strlen(char* string)
+{
+	lll_u32	length = 0;
+	while (*string)
+	{
+		string++;
+		length++;
+	}
+	return length;
+}
+
 lll_u32	lll_strchr(lll_string string, char c)
 {
 	for (lll_u32 i = 0; i < string.length; i++)
@@ -161,6 +172,21 @@ static lll_u8	lll_sprintf_binary(lll_u64 data, lll_u8 data_size, struct lll_spri
 	return output_size;
 }
 
+static void	lll_sprintf_output(char** buffer_memory, lll_string* buffer, char* data, lll_u32 data_size)
+{
+	lll_u32	writable_length = buffer->length - (*buffer_memory - buffer->data);
+	if (writable_length > data_size)
+	{
+		lll_memcpy(*buffer_memory, data, data_size);
+		*buffer_memory += data_size;
+	}
+	else
+	{
+		lll_memcpy(*buffer_memory, data, writable_length);
+		*buffer_memory += writable_length;
+	}
+}
+
 lll_u32	lll_sprintf(lll_string buffer, const char* format, ...)
 {
 	char*	buffer_memory = buffer.data;
@@ -270,36 +296,118 @@ no_flags:
 							temp /= 10;
 							start--;
 						}
+						if ((number < 0) && lll_sprintf_has_space(0))
+						{
+							*buffer_memory = '-';
+							buffer_memory++;
+						}
 					}
 				}
-				if (lll_sprintf_has_space(substitution_buffer_size - 1))
-				{
-					lll_memcpy(buffer_memory, substitution_buffer, substitution_buffer_size);
-					buffer_memory += substitution_buffer_size;
-				}
+				lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
 				format++;
 			} break;
 			case 'x':
 			case 'X':
 			case 'u':
 			{
-				// lll_u32	number = lll_va_arg(args, lll_u32);
+				lll_u32	number = lll_va_arg(args, lll_u32);
+				substitution_buffer_size = lll_sprintf_binary(number, sizeof(number), state, substitution_buffer);
+				if (substitution_buffer_size == 0)
+				{
+					if (number == 0)
+					{
+						*substitution_buffer = '0';
+						substitution_buffer_size = 1;
+					}
+					else
+					{
+						lll_u32	temp = number;
+						while (temp != 0)
+						{
+							temp /= 10;
+							substitution_buffer_size++;
+						}
+						temp = number;
+						char*	start = substitution_buffer + substitution_buffer_size - 1;
+						for (int i = substitution_buffer_size - 1; i >= 0; i--)
+						{
+							*start = '0' + (temp % 10);
+							temp /= 10;
+							start--;
+						}
+					}
+				}
+				lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
+				format++;
 			} break;
 			case 'p':
 			{
-				// lll_u64	pointer = lll_va_arg(args, lll_u64);
+				lll_ptr	pointer = lll_va_arg(args, lll_ptr);
+				if (pointer == 0)
+				{
+					*substitution_buffer = '0';
+					substitution_buffer_size = 1;
+				}
+				else
+				{
+					lll_ptr	temp = pointer;
+					while (temp != 0)
+					{
+						temp /= 16;
+						substitution_buffer_size++;
+					}
+					temp = pointer;
+					char*	start = substitution_buffer + substitution_buffer_size - 1;
+					for (int i = substitution_buffer_size - 1; i >= 0; i--)
+					{
+						if (temp % 16 >= 10)
+						{
+							*start = 'a' + (temp % 16);
+						}
+						else
+						{
+							*start = '0' + (temp % 16);
+						}
+						temp /= 16;
+						start--;
+					}
+				}
+				lll_sprintf_output(&buffer_memory, &buffer, "0x", 2);
+				lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
+				format++;
 			} break;
 			case 's':
 			{
-				// char*	string = lll_va_arg(args, char*);
+				char*	string = lll_va_arg(args, char*);
+				lll_sprintf_output(&buffer_memory, &buffer, string, lll_strlen(string));
+				format++;
 			} break;
 			case 'c':
 			{
-				// char	character = lll_va_arg(args, char);
+				char	character = lll_va_arg(args, char);
+				substitution_buffer_size = lll_sprintf_binary(character, sizeof(character), state, substitution_buffer);
+				if (substitution_buffer_size == 0)
+				{
+					if (lll_sprintf_has_space(0))
+					{
+						*buffer_memory = character;
+						buffer_memory++;
+					}
+				}
+				else
+				{
+					lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
+				}
+				format++;
 			} break;
 			case '%':
 			{
-
+				if (lll_sprintf_has_space(0))
+				{
+					*buffer_memory = '%';
+					buffer_memory++;
+				}
+				format++;
 			} break;
 			case 0: // Note: syntax error but no need to produce an error
 			default:
@@ -405,7 +513,7 @@ int main(void)
 			}
 			else if (lll_string_is_equal(token, lll_cstring("get")))
 			{
-				lll_u32 length = lll_sprintf(string, "get [%Bd]\n", 1024);
+				lll_u32 length = lll_sprintf(string, "get\n");
 				(void) !write(STDOUT_FILENO, buff, length);
 			}
 			else if (lll_string_is_equal(token, lll_cstring("set")))
