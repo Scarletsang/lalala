@@ -1,6 +1,7 @@
 #include "lalala.h"
 #include <signal.h>
 #include <unistd.h>
+#include <sys/mman.h>
 
 #define READ_BUFF_SIZE	1024
 
@@ -70,6 +71,48 @@ void	lll_memcpy(void* dest, void* src, lll_u32 size)
 		dest++;
 		src++;
 	}
+}
+
+lll_b8	lll_arena_init(lll_arena* arena, lll_u32 size)
+{
+	arena->memory = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	arena->capacity = size;
+	arena->used = 0;
+	return (arena->memory != ((void*) -1));
+}
+
+void	lll_arena_split(lll_arena* arena, lll_u32 size, lll_arena* output)
+{
+	output->memory = lll_arena_alloc(arena, size, LLL_TRUE);
+	output->used = 0;
+	output->capacity = size;
+}
+
+void*	lll_arena_alloc(lll_arena* arena, lll_u32 size, lll_b8 is_alligned)
+{
+	lll_assert((arena->memory + arena->used + size) > (arena->memory + arena->capacity), "Arena cannot fit to requested size of memory");
+	if (is_alligned)
+	{
+#ifdef LLL_32_BIT_POINTER
+		lll_u32	word_size = 4;
+#else
+		lll_u32	word_size = 8;
+#endif
+		size += size % word_size;
+	}
+	void*	result = arena->memory + arena->used;
+	arena->used += size;
+	return result;
+}
+
+lll_arena_snapshot	lll_arena_cheese(lll_arena* arena)
+{
+	return arena->used;
+}
+
+void	lll_arena_rollback(lll_arena* arena, lll_arena_snapshot snapshot)
+{
+	arena->used = snapshot;
 }
 
 void	lll_sprintf_test()
