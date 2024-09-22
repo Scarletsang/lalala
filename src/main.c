@@ -149,13 +149,30 @@ lll_b8	lll_tokenize(lll_string* input, lll_token* output)
 	return LLL_TRUE;
 }
 
+struct app_entry
+{
+	lll_b8		is_deleted;
+	lll_string	string;
+};
+
 int main(void)
 {
 	lll_sprintf_test();
 	lll_b8		quit = LLL_FALSE;
+	lll_b8		syntax_error = LLL_FALSE;
 	lll_token	token;
+	lll_arena	arena;
+	lll_ht		hashtable;
+
+	if (!lll_arena_init(&arena, 2 * LLL_PAGE_SIZE))
+	{
+		(void) !write(STDOUT_FILENO, "Failed to allocate memory", sizeof("Failed to allocate memory") - 1);
+		return 1;
+	}
+	lll_ht_init(&hashtable, sizeof(struct app_entry), 1024, &arena);
 	while (!quit)
 	{
+		syntax_error = LLL_FALSE;
 		(void) !write(STDOUT_FILENO, "lalala terminal>", sizeof("lalala terminal>") - 1);
 		lll_i32	size = (lll_i32) read(STDIN_FILENO, read_buff, READ_BUFF_SIZE);
 		if (size <= 0)
@@ -179,15 +196,61 @@ int main(void)
 			}
 			else if (lll_string_is_equal(token, lll_cstring("get")))
 			{
-				lll_printf("get\n");
+				if (lll_tokenize(&user_input, &token))
+				{
+					struct app_entry* entry = lll_ht_get(&hashtable, token);
+					if (entry)
+					{
+						lll_printf("Found by key '%.*s': '%.*s'\n", token.length, token.data, entry->string.length, entry->string.data);
+					}
+					else
+					{
+						lll_printf("Cannot find entry by key '%.*s'\n", token.length, token.data);
+					}
+				}
+				else
+				{
+					syntax_error = LLL_TRUE;
+				}
 			}
 			else if (lll_string_is_equal(token, lll_cstring("set")))
 			{
-				lll_printf("set\n");
+				lll_token	parameter_2;
+				if (lll_tokenize(&user_input, &token) && lll_tokenize(&user_input, &parameter_2))
+				{
+					struct app_entry* entry = lll_ht_set(&hashtable, token, &parameter_2);
+					if (entry)
+					{
+						lll_printf("Set entry using key '%.*s': '%.*s'\n", token.length, token.data, entry->string.length, entry->string.data);
+					}
+					else
+					{
+						lll_printf("Cannot set entry by key '%.*s'\n", token.length, token.data);
+					}
+				}
+				else
+				{
+					syntax_error = LLL_TRUE;
+				}
 			}
 			else if (lll_string_is_equal(token, lll_cstring("remove")))
 			{
-				lll_printf("remove\n");
+				if (lll_tokenize(&user_input, &token))
+				{
+					struct app_entry* entry = lll_ht_get(&hashtable, token);
+					if (entry)
+					{
+						lll_printf("Removed entry using key '%.*s': '%.*s'\n", token.length, token.data, entry->string.length, entry->string.data);
+					}
+					else
+					{
+						lll_printf("Cannot find entry by key '%.*s'\n", token.length, token.data);
+					}
+				}
+				else
+				{
+					syntax_error = LLL_TRUE;
+				}
 			}
 			else if (lll_string_is_equal(token, lll_cstring("quit")))
 			{
@@ -196,6 +259,10 @@ int main(void)
 			else
 			{
 				lll_printf("Error: invalid command\n");
+			}
+			if (syntax_error)
+			{
+				lll_printf("Error: Syntax error\n");
 			}
 		}
 		user_input.data = read_buff;

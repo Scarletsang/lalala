@@ -5,6 +5,7 @@
 #define LLL_FALSE	0
 #define LLL_INVALID_INDEX	((lll_u32) -1)
 #define LLL_INVALID_SIZE	((lll_u32) -1)
+#define LLL_PAGE_SIZE	(4096)
 
 typedef unsigned int	lll_u32;
 typedef int				lll_i32;
