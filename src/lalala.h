@@ -18,6 +18,13 @@ typedef lll_u32			lll_ptr;
 typedef lll_u64			lll_ptr;
 #endif
 
+#ifdef DEBUG
+void	lll_assert_explicit(lll_b8 check, const char* message, int line_number, const char* function_name, const char* file_name);
+#define lll_assert(check, message) lll_assert_explicit(check, message, __LINE__, __FUNCTION__, __FILE__) 
+#else
+#define lll_assert(check, message) ((void) 0)
+#endif
+
 typedef struct
 {
 	char*	data;
