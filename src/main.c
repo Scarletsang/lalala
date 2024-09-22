@@ -1,4 +1,5 @@
 #include "lalala.h"
+#include <signal.h>
 #include <unistd.h>
 
 #define READ_BUFF_SIZE	1024
@@ -7,6 +8,21 @@ typedef lll_string	lll_token;
 
 static char		read_buff[READ_BUFF_SIZE];
 static lll_string	user_input = {read_buff, 0};
+
+void	lll_assert_explicit(lll_b8 check, const char* message, int line_number, const char* function_name, const char* file_name)
+{
+	if (!check)
+	{
+		lll_fdprintf(STDERR_FILENO, "ASSERT TRIGGERED in %s at function %s, line %d:\nReason: %s\n", file_name, function_name, line_number, message);
+		kill(getpid(), SIGABRT);
+	}
+}
+
+#ifdef DEBUG
+#define lll_assert(check, message) lll_assert_explicit(check, message, __LINE__, __FUNCTION__, __FILE__) 
+#else
+#define lll_assert(check, message) ((void) 0)
+#endif
 
 lll_u32	lll_strlen(char* string)
 {
