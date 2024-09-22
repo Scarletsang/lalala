@@ -43,7 +43,7 @@ lll_b8	lll_string_is_equal(lll_string target, lll_string reference)
 		reference.data++;
 		matched++;
 	}
-	return (matched == reference.length);
+	return (matched == reference.length) && (matched == target.length);
 }
 
 void	lll_memcpy(void* dest, void* src, lll_u32 size)
