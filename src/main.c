@@ -356,8 +356,34 @@ no_flags:
 							start--;
 						}
 					}
+					lll_u32	zero_padding_length = 0;
+					if (state.has_precision && (state.precision > substitution_buffer_size))
+					{
+						zero_padding_length = state.precision - substitution_buffer_size;
+					}
+					lll_u32	space_padding_length = 0;
+					if (state.has_width && (state.width > (substitution_buffer_size + zero_padding_length)))
+					{
+						space_padding_length = state.width - (substitution_buffer_size + zero_padding_length);
+					}
+					if (state.is_left_justify)
+					{
+						lll_sprintf_output_characters(&buffer_memory, &buffer, '0', zero_padding_length); 
+						lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
+						lll_sprintf_output_characters(&buffer_memory, &buffer, ' ', space_padding_length); 
+					}
+					else
+					{
+						lll_sprintf_output_characters(&buffer_memory, &buffer, ' ', space_padding_length); 
+						lll_sprintf_output_characters(&buffer_memory, &buffer, '0', zero_padding_length); 
+						lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
+
+					}
 				}
-				lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
+				else
+				{
+					lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
+				}
 				format++;
 			} break;
 			case 'p':
@@ -500,6 +526,14 @@ void	lll_sprintf_test()
 	length = lll_sprintf(string, "front[%xu]after\n", 2234567);
 	write(STDOUT_FILENO, buffer, length);
 	length = lll_sprintf(string, "front[%bxu]after\n", 2234567);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%10.4u]after\n", 12);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%-10.4u]after\n", 12345);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%10.u]after\n", 12345);
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%3.9u]after\n", 12345);
 	write(STDOUT_FILENO, buffer, length);
 	// Note: format p
 	length = lll_sprintf(string, "front[%p]after\n", &length);
