@@ -25,6 +25,11 @@ typedef struct
 }	lll_string;
 
 #define lll_cstring(c_string) ((lll_string) {c_string, sizeof(c_string) - 1})
+lll_u32	lll_strlen(char* string);
+lll_u32	lll_strchr(lll_string string, char c);
+lll_b8	lll_string_is_equal(lll_string target, lll_string reference);
+void	lll_memcpy(void* dest, void* src, lll_u32 size);
+lll_u32	lll_sprintf(lll_string buffer, const char* format, ...);
 
 typedef struct
 {

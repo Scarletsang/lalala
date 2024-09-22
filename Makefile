@@ -3,7 +3,7 @@ CFLAGS= -Wall -Werror -Wextra -g
 LDFLAGS= -g
 TARGET=lalala
 
-SRC:= src/main.c
+SRC:= src/main.c src/lll_sprintf.c
 OBJ:= $(SRC:.c=.o)
 
 all: $(TARGET)
