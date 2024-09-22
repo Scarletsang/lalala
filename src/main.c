@@ -501,57 +501,87 @@ void	lll_sprintf_test()
 	char		buffer[1024];
 	lll_string	string = {buffer, 1024};
 	lll_u32		length;
-	// Note: format d
-	length = lll_sprintf(string, "front[%d]after\n", 1234);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%d]after\n", -1234);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%bd]after\n", -1234);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%xd]after\n", -1234);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%xbd]after\n", -1234);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf((lll_string){buffer, 3}, "%d]after\n", 1234);
-	write(STDOUT_FILENO, buffer, length);
-	// Note: format u
-	length = lll_sprintf(string, "front[%u]after\n", 2234567);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%u]after\n", 2234567);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%bu]after\n", 2234567);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%xu]after\n", 2234567);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%bxu]after\n", 2234567);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%10.4u]after\n", 12);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%-10.4u]after\n", 12345);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%10.u]after\n", 12345);
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%3.9u]after\n", 12345);
-	write(STDOUT_FILENO, buffer, length);
-	// Note: format p
-	length = lll_sprintf(string, "front[%p]after\n", &length);
-	write(STDOUT_FILENO, buffer, length);
-	// Note: format s
-	length = lll_sprintf(string, "front[%s]after\n", "what the actual fuck");
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%.*s]after\n", 4, "what the actual fuck");
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%10s]after\n", "what");
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%-10s]after\n", "what");
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%-10.5s]after\n", "123456789");
-	write(STDOUT_FILENO, buffer, length);
-	length = lll_sprintf(string, "front[%-*.*s]after\n", 10, 5, "123456789");
-	write(STDOUT_FILENO, buffer, length);
-	// Note: format c
-	length = lll_sprintf(string, "front[%c]after\n", 'a');
-	write(STDOUT_FILENO, buffer, length);
+	for (int i = 0; i < 2; i++)
+	{
+		if (i == 1)
+		{
+			string.length = 10;
+		}
+		// Note: format d
+		length = lll_sprintf(string, "front[%d]after", 1234);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%d]after", -1234);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%bd]after", -1234);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%xd]after", -1234);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%xbd]after", -1234);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf((lll_string){buffer, 3}, "%d]after", 1234);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		// Note: format u
+		length = lll_sprintf(string, "front[%u]after", 2234567);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%u]after", 2234567);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%bu]after", 2234567);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%xu]after", 2234567);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%bxu]after", 2234567);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%10.4u]after", 12);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%-10.4u]after", 12345);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%10.u]after", 12345);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%3.9u]after", 12345);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		// Note: format p
+		length = lll_sprintf(string, "front[%p]after", &length);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		// Note: format s
+		length = lll_sprintf(string, "front[%s]after", "what the actual fuck");
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%.*s]after", 4, "what the actual fuck");
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%10s]after", "what");
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%-10s]after", "what");
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%-10.5s]after", "123456789");
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%-*.*s]after", 10, 5, "123456789");
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+		// Note: format c
+		length = lll_sprintf(string, "front[%c]after", 'a');
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
+	}
 }
 
 lll_b8	lll_tokenize(lll_string* input, lll_token* output)
