@@ -64,7 +64,7 @@ struct lll_sprintf_state
 	lll_b8	is_padding_with_zero : 1; // 0
 	lll_b8	is_binary : 1; // b
 	lll_b8	is_binary_big_endian : 1; // B
-	lll_b8	is_binary_hex : 1; // h
+	lll_b8	is_binary_hex : 1; // x
 	lll_b8	has_width : 1;
 	lll_b8	has_precision : 1;
 	lll_i32	width; // Note: minimum characters to print
@@ -120,7 +120,7 @@ static lll_u8	lll_sprintf_binary(lll_u64 data, lll_u8 data_size, struct lll_spri
 			}
 		}
 	}
-	else if (state.is_binary)
+	else if (state.is_binary || state.is_binary_hex)
 	{
 		if (state.is_binary_hex)
 		{
@@ -209,7 +209,7 @@ lll_u32	lll_sprintf(lll_string buffer, const char* format, ...)
 				case '0': state.is_padding_with_zero    = LLL_TRUE; break;
 				case 'b': state.is_binary               = LLL_TRUE; break;
 				case 'B': state.is_binary_big_endian    = LLL_TRUE; break;
-				case 'h': state.is_binary_hex           = LLL_TRUE; break;
+				case 'x': state.is_binary_hex           = LLL_TRUE; break;
 				default: goto no_flags;
 				}
 				format++;
@@ -306,8 +306,6 @@ no_flags:
 				lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
 				format++;
 			} break;
-			case 'x':
-			case 'X':
 			case 'u':
 			{
 				lll_u32	number = lll_va_arg(args, lll_u32);
