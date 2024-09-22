@@ -362,7 +362,7 @@ no_flags:
 					{
 						if (temp % 16 >= 10)
 						{
-							*start = 'a' + (temp % 16);
+							*start = 'a' + (temp % 16) - 10;
 						}
 						else
 						{
