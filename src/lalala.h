@@ -30,6 +30,8 @@ lll_u32	lll_strchr(lll_string string, char c);
 lll_b8	lll_string_is_equal(lll_string target, lll_string reference);
 void	lll_memcpy(void* dest, void* src, lll_u32 size);
 lll_u32	lll_sprintf(lll_string buffer, const char* format, ...);
+// Can only print 1024 characters at maximum
+lll_u32	lll_printf(const char* format, ...);
 
 typedef struct
 {

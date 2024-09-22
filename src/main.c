@@ -206,8 +206,6 @@ int main(void)
 	lll_sprintf_test();
 	lll_b8		quit = LLL_FALSE;
 	lll_token	token;
-	static char	buff[1024];
-	lll_string	string = {buff, 1024};
 	while (!quit)
 	{
 		(void) !write(STDOUT_FILENO, "lalala terminal>", sizeof("lalala terminal>") - 1);
@@ -229,20 +227,19 @@ int main(void)
 		{
 			if (lll_string_is_equal(token, lll_cstring("help")))
 			{
-				(void) !write(STDOUT_FILENO, "help\n", sizeof("help\n") - 1);
+				lll_printf("help\n");
 			}
 			else if (lll_string_is_equal(token, lll_cstring("get")))
 			{
-				lll_u32 length = lll_sprintf(string, "get\n");
-				(void) !write(STDOUT_FILENO, buff, length);
+				lll_printf("get\n");
 			}
 			else if (lll_string_is_equal(token, lll_cstring("set")))
 			{
-				(void) !write(STDOUT_FILENO, "set\n", sizeof("set\n") - 1);
+				lll_printf("set\n");
 			}
 			else if (lll_string_is_equal(token, lll_cstring("remove")))
 			{
-				(void) !write(STDOUT_FILENO, "remove\n", sizeof("remove\n") - 1);
+				lll_printf("remove\n");
 			}
 			else if (lll_string_is_equal(token, lll_cstring("quit")))
 			{
@@ -250,7 +247,7 @@ int main(void)
 			}
 			else
 			{
-				(void) !write(STDOUT_FILENO, "Error: invalid command\n", sizeof("Error: invalid command\n") - 1);
+				lll_printf("Error: invalid command\n");
 			}
 		}
 		user_input.data = read_buff;

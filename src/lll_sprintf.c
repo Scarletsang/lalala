@@ -1,5 +1,6 @@
 #include "lalala.h"
 #include <stdarg.h>
+#include <unistd.h>
 
 struct lll_sprintf_state
 {
@@ -150,11 +151,9 @@ static void	lll_sprintf_output_characters(char** buffer_memory, lll_string* buff
 	}
 }
 
-lll_u32	lll_sprintf(lll_string buffer, const char* format, ...)
+lll_u32	lll_vsprintf(lll_string buffer, const char* format, va_list args)
 {
 	char*	buffer_memory = buffer.data;
-	va_list	args;
-	va_start(args, format);
 #define lll_sprintf_has_space(n) ((buffer_memory - buffer.data + n) < buffer.length)
 	while (*format && lll_sprintf_has_space(0))
 	{
@@ -440,4 +439,23 @@ no_flags:
 	return (buffer_memory - buffer.data);
 }
 
+lll_u32	lll_sprintf(lll_string buffer, const char* format, ...)
+{
+	va_list	args;
+	va_start(args, format);
+	lll_u32 result = lll_vsprintf(buffer, format, args);
+	va_end(args);
+	return result;
+}
 
+lll_u32	lll_printf(const char* format, ...)
+{
+	static char buffer_memory[1024];
+	static lll_string buffer = {buffer_memory, 1024};
+	va_list	args;
+	va_start(args, format);
+	lll_u32 result = lll_vsprintf(buffer, format, args);
+	write(STDOUT_FILENO, buffer_memory, result);
+	va_end(args);
+	return result;
+}
