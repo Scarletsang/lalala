@@ -239,6 +239,7 @@ no_flags:
 			// Note: sprintf width
 			if (*format == '*')
 			{
+				state.has_width = LLL_TRUE;
 				state.width = va_arg(args, lll_u32);
 				format++;
 			}
