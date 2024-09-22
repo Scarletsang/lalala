@@ -126,14 +126,7 @@ lll_b8	lll_tokenize(lll_string* input, lll_token* output)
 		if (*string.data == lookup_target)
 		{
 			output->data = start;
-			if ((lookup_target == '\'') || (lookup_target == '"'))
-			{
-				output->length = i;
-			}
-			else
-			{
-				output->length = i + 1;
-			}
+			output->length = i;
 			string.data++;
 			break;
 		}
