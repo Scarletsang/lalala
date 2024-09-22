@@ -68,7 +68,7 @@ struct lll_sprintf_state
 	lll_b8	is_binary_hex : 1; // x
 	lll_b8	has_width : 1;
 	lll_b8	has_precision : 1;
-	lll_i32	width; // Note: minimum characters to print
+	lll_u32	width; // Note: minimum characters to print
 	lll_u32	precision; // Note: for string, maximum characters to print; for number, minimum of digits to print
 };
 
@@ -185,6 +185,25 @@ static void	lll_sprintf_output(char** buffer_memory, lll_string* buffer, char* d
 	{
 		lll_memcpy(*buffer_memory, data, writable_length);
 		*buffer_memory += writable_length;
+	}
+}
+
+static void	lll_sprintf_output_characters(char** buffer_memory, lll_string* buffer, char character, lll_u32 amount)
+{
+	lll_u32	writable_length = buffer->length - (*buffer_memory - buffer->data);
+	lll_u32	write_length = 0;
+	if (writable_length > amount)
+	{
+		write_length = amount;
+	}
+	else
+	{
+		write_length = writable_length;
+	}
+	for (lll_u32 i = 0; i < write_length; i++)
+	{
+		**buffer_memory = character;
+		(*buffer_memory)++;
 	}
 }
 
@@ -379,13 +398,33 @@ no_flags:
 			case 's':
 			{
 				char*	string = va_arg(args, char*);
+				lll_u32	output_length = 0;
 				if (state.has_precision)
 				{
-					lll_sprintf_output(&buffer_memory, &buffer, string, state.precision);
+					output_length = state.precision;
 				}
 				else
 				{
-					lll_sprintf_output(&buffer_memory, &buffer, string, lll_strlen(string));
+					output_length = lll_strlen(string);
+				}
+				if (state.has_width && (state.width > output_length))
+				{
+					// Note: Write padding
+					lll_u32	padding_length = state.width - output_length;
+					if (state.is_left_justify)
+					{
+						lll_sprintf_output(&buffer_memory, &buffer, string, output_length);
+						lll_sprintf_output_characters(&buffer_memory, &buffer, ' ', padding_length);
+					}
+					else
+					{
+						lll_sprintf_output_characters(&buffer_memory, &buffer, ' ', padding_length);
+						lll_sprintf_output(&buffer_memory, &buffer, string, output_length);
+					}
+				}
+				else
+				{
+					lll_sprintf_output(&buffer_memory, &buffer, string, output_length);
 				}
 				format++;
 			} break;
@@ -468,6 +507,14 @@ void	lll_sprintf_test()
 	length = lll_sprintf(string, "front[%s]after\n", "what the actual fuck");
 	write(STDOUT_FILENO, buffer, length);
 	length = lll_sprintf(string, "front[%.*s]after\n", 4, "what the actual fuck");
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%10s]after\n", "what");
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%-10s]after\n", "what");
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%-10.5s]after\n", "123456789");
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%-*.*s]after\n", 10, 5, "123456789");
 	write(STDOUT_FILENO, buffer, length);
 	// Note: format c
 	length = lll_sprintf(string, "front[%c]after\n", 'a');
