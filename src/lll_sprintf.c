@@ -488,14 +488,15 @@ lll_u32	lll_sprintf(lll_string buffer, const char* format, ...)
 	return result;
 }
 
-lll_u32	lll_printf(const char* format, ...)
+lll_u32	lll_fdprintf(int fd, const char* format, ...)
 {
 	static char buffer_memory[1024];
 	static lll_string buffer = {buffer_memory, 1024};
 	va_list	args;
 	va_start(args, format);
 	lll_u32 result = lll_vsprintf(buffer, format, args);
-	write(STDOUT_FILENO, buffer_memory, result);
+	write(fd, buffer_memory, result);
 	va_end(args);
 	return result;
 }
+

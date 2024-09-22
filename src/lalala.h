@@ -31,7 +31,8 @@ lll_b8	lll_string_is_equal(lll_string target, lll_string reference);
 void	lll_memcpy(void* dest, void* src, lll_u32 size);
 lll_u32	lll_sprintf(lll_string buffer, const char* format, ...);
 // Can only print 1024 characters at maximum
-lll_u32	lll_printf(const char* format, ...);
+lll_u32	lll_fdprintf(int fd, const char* format, ...);
+#define lll_printf(format, ...) lll_fdprintf(STDOUT_FILENO, format __VA_OPT__(,) __VA_ARGS__)
 
 typedef struct
 {
