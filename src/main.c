@@ -1,4 +1,5 @@
 #include "lalala.h"
+#include <stdarg.h>
 #include <unistd.h>
 
 #define READ_BUFF_SIZE	1024
@@ -190,7 +191,8 @@ static void	lll_sprintf_output(char** buffer_memory, lll_string* buffer, char* d
 lll_u32	lll_sprintf(lll_string buffer, const char* format, ...)
 {
 	char*	buffer_memory = buffer.data;
-	lll_va_list	args = lll_va_start(format);
+	va_list	args;
+	va_start(args, format);
 #define lll_sprintf_has_space(n) ((buffer_memory - buffer.data + n) < buffer.length)
 	while (*format && lll_sprintf_has_space(0))
 	{
@@ -218,7 +220,7 @@ no_flags:
 			// Note: sprintf width
 			if (*format == '*')
 			{
-				state.width = lll_va_arg(args, lll_u32);
+				state.width = va_arg(args, lll_u32);
 				format++;
 			}
 			else
@@ -243,7 +245,7 @@ no_flags:
 				state.has_precision = LLL_TRUE;
 				if (*format == '*')
 				{
-					state.precision = lll_va_arg(args, lll_u32);
+					state.precision = va_arg(args, lll_u32);
 					format++;
 				}
 				else
@@ -264,7 +266,7 @@ no_flags:
 			case 'd':
 			case 'i':
 			{
-				lll_i32	number = lll_va_arg(args, lll_i32);
+				lll_i32	number = va_arg(args, lll_i32);
 				substitution_buffer_size = lll_sprintf_binary(number, sizeof(number), state, substitution_buffer);
 				if (substitution_buffer_size == 0)
 				{
@@ -308,7 +310,7 @@ no_flags:
 			} break;
 			case 'u':
 			{
-				lll_u32	number = lll_va_arg(args, lll_u32);
+				lll_u32	number = va_arg(args, lll_u32);
 				substitution_buffer_size = lll_sprintf_binary(number, sizeof(number), state, substitution_buffer);
 				if (substitution_buffer_size == 0)
 				{
@@ -340,7 +342,7 @@ no_flags:
 			} break;
 			case 'p':
 			{
-				lll_ptr	pointer = lll_va_arg(args, lll_ptr);
+				lll_ptr	pointer = va_arg(args, lll_ptr);
 				if (pointer == 0)
 				{
 					*substitution_buffer = '0';
@@ -376,13 +378,13 @@ no_flags:
 			} break;
 			case 's':
 			{
-				char*	string = lll_va_arg(args, char*);
+				char*	string = va_arg(args, char*);
 				lll_sprintf_output(&buffer_memory, &buffer, string, lll_strlen(string));
 				format++;
 			} break;
 			case 'c':
 			{
-				char	character = lll_va_arg(args, char);
+				char	character = va_arg(args, lll_i32);
 				substitution_buffer_size = lll_sprintf_binary(character, sizeof(character), state, substitution_buffer);
 				if (substitution_buffer_size == 0)
 				{

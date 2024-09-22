@@ -18,18 +18,6 @@ typedef lll_u32			lll_ptr;
 typedef lll_u64			lll_ptr;
 #endif
 
-typedef char*	lll_va_list;
-#define lll_va_start(arg) ((lll_va_list) &arg + (sizeof(arg) << 3))
-
-static inline void* __lll_va_arg(lll_va_list* list, lll_u32 size)
-{
-	void*	result = *list;
-	*list += (size << 3);
-	return result;
-}
-
-#define	lll_va_arg(list, type) (*(type*) __lll_va_arg(&list, sizeof(type)))
-
 typedef struct
 {
 	char*	data;
