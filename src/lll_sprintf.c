@@ -259,14 +259,54 @@ no_flags:
 							temp /= 10;
 							start--;
 						}
+					}
+					lll_u32	zero_padding_length = 0;
+					if (state.has_precision && (state.precision > substitution_buffer_size))
+					{
+						zero_padding_length = state.precision - substitution_buffer_size;
+					}
+					lll_u32	space_padding_length = 0;
+					if (state.has_width && (state.width > (substitution_buffer_size + zero_padding_length)))
+					{
+						space_padding_length = state.width - (substitution_buffer_size + zero_padding_length);
+					}
+					if (state.is_left_justify)
+					{
+						lll_sprintf_output_characters(&buffer_memory, &buffer, '0', zero_padding_length);
 						if ((number < 0) && lll_sprintf_has_space(0))
 						{
 							*buffer_memory = '-';
 							buffer_memory++;
 						}
+						else if ((number >= 0) && state.is_force_positive_sign && lll_sprintf_has_space(0))
+						{
+							*buffer_memory = '+';
+							buffer_memory++;
+						}
+						lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
+						lll_sprintf_output_characters(&buffer_memory, &buffer, ' ', space_padding_length); 
+					}
+					else
+					{
+						lll_sprintf_output_characters(&buffer_memory, &buffer, ' ', space_padding_length); 
+						lll_sprintf_output_characters(&buffer_memory, &buffer, '0', zero_padding_length); 
+						if ((number < 0) && lll_sprintf_has_space(0))
+						{
+							*buffer_memory = '-';
+							buffer_memory++;
+						}
+						else if ((number >= 0) && state.is_force_positive_sign && lll_sprintf_has_space(0))
+						{
+							*buffer_memory = '+';
+							buffer_memory++;
+						}
+						lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
 					}
 				}
-				lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
+				else
+				{
+					lll_sprintf_output(&buffer_memory, &buffer, substitution_buffer, substitution_buffer_size);
+				}
 				format++;
 			} break;
 			case 'u':

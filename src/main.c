@@ -86,6 +86,9 @@ void	lll_sprintf_test()
 		length = lll_sprintf((lll_string){buffer, 3}, "%d]after", 1234);
 		write(STDOUT_FILENO, buffer, length);
 		write(STDOUT_FILENO, "\n", 1);
+		length = lll_sprintf(string, "front[%-+10.5d]after", 1234);
+		write(STDOUT_FILENO, buffer, length);
+		write(STDOUT_FILENO, "\n", 1);
 		// Note: format u
 		length = lll_sprintf(string, "front[%u]after", 2234567);
 		write(STDOUT_FILENO, buffer, length);
