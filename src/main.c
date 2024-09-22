@@ -62,7 +62,6 @@ struct lll_sprintf_state
 	lll_b8	is_left_justify : 1; // -
 	lll_b8	is_force_positive_sign : 1; // +
 	lll_b8	is_force_positive_space : 1; // ' '
-	lll_b8	is_padding_with_zero : 1; // 0
 	lll_b8	is_binary : 1; // b
 	lll_b8	is_binary_big_endian : 1; // B
 	lll_b8	is_binary_hex : 1; // x
@@ -227,7 +226,6 @@ lll_u32	lll_sprintf(lll_string buffer, const char* format, ...)
 				case '-': state.is_left_justify         = LLL_TRUE; break;
 				case '+': state.is_force_positive_sign  = LLL_TRUE; break;
 				case ' ': state.is_force_positive_space = LLL_TRUE; break;
-				case '0': state.is_padding_with_zero    = LLL_TRUE; break;
 				case 'b': state.is_binary               = LLL_TRUE; break;
 				case 'B': state.is_binary_big_endian    = LLL_TRUE; break;
 				case 'x': state.is_binary_hex           = LLL_TRUE; break;
