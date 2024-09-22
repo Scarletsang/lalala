@@ -379,7 +379,14 @@ no_flags:
 			case 's':
 			{
 				char*	string = va_arg(args, char*);
-				lll_sprintf_output(&buffer_memory, &buffer, string, lll_strlen(string));
+				if (state.has_precision)
+				{
+					lll_sprintf_output(&buffer_memory, &buffer, string, state.precision);
+				}
+				else
+				{
+					lll_sprintf_output(&buffer_memory, &buffer, string, lll_strlen(string));
+				}
 				format++;
 			} break;
 			case 'c':
@@ -459,6 +466,8 @@ void	lll_sprintf_test()
 	write(STDOUT_FILENO, buffer, length);
 	// Note: format s
 	length = lll_sprintf(string, "front[%s]after\n", "what the actual fuck");
+	write(STDOUT_FILENO, buffer, length);
+	length = lll_sprintf(string, "front[%.*s]after\n", 4, "what the actual fuck");
 	write(STDOUT_FILENO, buffer, length);
 	// Note: format c
 	length = lll_sprintf(string, "front[%c]after\n", 'a');
