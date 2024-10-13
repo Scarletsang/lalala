@@ -369,7 +369,7 @@ no_flags:
 			} break;
 			case 'p':
 			{
-				lll_ptr	pointer = va_arg(args, lll_ptr);
+				void*	pointer = va_arg(args, void*);
 				if (pointer == 0)
 				{
 					*substitution_buffer = '0';
@@ -377,13 +377,13 @@ no_flags:
 				}
 				else
 				{
-					lll_ptr	temp = pointer;
+					lll_u64	temp = (lll_u64) pointer;
 					while (temp != 0)
 					{
 						temp /= 16;
 						substitution_buffer_size++;
 					}
-					temp = pointer;
+					temp = (lll_u64) pointer;
 					char*	start = substitution_buffer + substitution_buffer_size - 1;
 					for (int i = substitution_buffer_size - 1; i >= 0; i--)
 					{
