@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  linux_arm64:
+    image: linux_arm64
+    build:
+      context: .
+      args:
+        OUTPUT_SUFFIX: arm64
+    volumes:
+      - output:/output
+    container_name: linux_arm64
+    platform: linux/arm64
+
+  linux_arm32:
+    image: linux_arm32
+    build:
+      context: .
+      args:
+        OUTPUT_SUFFIX: arm32
+    volumes:
+      - output:/output
+    container_name: linux_arm32
+    platform: linux/arm/v7
+
+  linux_intel64:
+    image: linux_intel64
+    build:
+      context: .
+      args:
+        OUTPUT_SUFFIX: intel64
+    volumes:
+      - output:/output
+    container_name: linux_intel64
+    platform: linux/amd64
+
+volumes:
+  output:
+    name: output
+    driver: local
+    driver_opts:
+      o: "bind"
+      type: none
+      device: ./output
