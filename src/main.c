@@ -1,3 +1,4 @@
+#define LALALA_IMPLEMENTATION
 #include "lalala.h"
 #include <unistd.h>
 

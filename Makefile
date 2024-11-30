@@ -3,7 +3,7 @@ CFLAGS= -Wall -Werror -Wextra
 LDFLAGS=
 TARGET=lalala
 
-SRC:= src/main.c src/lalala.c src/lll_sprintf.c
+SRC:= src/main.c
 OBJ:= $(SRC:.c=.o)
 
 ifdef DEBUG
