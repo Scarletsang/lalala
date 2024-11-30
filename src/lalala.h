@@ -61,31 +61,33 @@ void	lll_arena_clear(lll_arena* arena);
 lll_arena_snapshot	lll_arena_cheese(lll_arena* arena);
 void	lll_arena_rollback(lll_arena* arena, lll_arena_snapshot snapshot);
 
-struct lll_ht_entry
+union lll_ht_entry
 {
-	lll_b8	is_deleted;
-	lll_u8	data[];
+	struct
+	{
+		void*								data;
+		union lll_ht_entry*	next;
+		lll_u32							hash;
+	};
+	struct
+	{
+		lll_u64							is_occupied;
+		union lll_ht_entry*	next_deleted;
+	};
 };
 
 typedef struct lll_ht
 {
-	lll_arena	entries;
-	lll_u32		entry_size;
+	union lll_ht_entry*	entries;
+	union lll_ht_entry*	free_list;
+	lll_u32							capacity;
+	lll_arena						entries_arena;
 }	lll_ht;
 
-void	lll_ht_init(lll_ht*	hashtable,
-					lll_u32	entry_size,
-					lll_u32	capacity,
-					lll_arena* arena);
-
-void*	lll_ht_set(lll_ht* hashtable,
-				   lll_string key,
-				   void* value);
-
-void*	lll_ht_get(lll_ht* hashtable,
-				   lll_string key);
-
-void*	lll_ht_remove(lll_ht* hashtable,
-				   	  lll_string key);
-
+lll_b8	lll_ht_init(lll_ht*	hashtable, lll_u32 capacity, lll_u32 duplicated_capacity);
+void		lll_ht_set(lll_ht* hashtable, lll_u32 key, void* value);
+void*		lll_ht_remove(lll_ht* hashtable, lll_u32 key);
+void**	lll_ht_get(lll_ht* hashtable, lll_u32 key);
+void		lll_ht_clear(lll_ht* hashtable);
+lll_u32	lll_hash_string(lll_string string);
 #endif

@@ -115,38 +115,153 @@ void	lll_arena_rollback(lll_arena* arena, lll_arena_snapshot snapshot)
 	arena->used = snapshot;
 }
 
-void	lll_ht_init(lll_ht*	hashtable,
-					lll_u32	entry_size,
-					lll_u32	capacity,
-					lll_arena* arena)
+lll_b8	lll_ht_init(lll_ht*	hashtable, lll_u32 capacity, lll_u32 duplicated_capacity)
 {
-	lll_arena_split(arena, entry_size * capacity, &hashtable->entries);
-	hashtable->entry_size = entry_size;
+	lll_b8 result = lll_arena_init(&hashtable->entries_arena, sizeof(union lll_ht_entry) * (capacity + duplicated_capacity));
+	hashtable->entries = (union lll_ht_entry*) hashtable->entries_arena.memory;
+	hashtable->free_list = NULL;
+	hashtable->capacity = capacity;
+	return result;
 }
 
-void*	lll_ht_set(lll_ht* hashtable,
-				   lll_string key,
-				   void* value)
+void	lll_ht_set(lll_ht* hashtable, lll_u32 key, void* value)
 {
-	(void) hashtable;
-	(void) key;
-	(void) value;
-	return NULL;
+	lll_assert(value != NULL, "hashtable value cannot be zero");
+	union lll_ht_entry* entry = hashtable->entries + (key % hashtable->capacity);
+	if (!entry->is_occupied)
+	{
+		entry->data = value;
+		entry->next = NULL;
+		entry->hash = key;
+	}
+	else
+	{
+		lll_b8	found_myself = LLL_FALSE;
+		while (LLL_TRUE)
+		{
+			if (entry->hash == key)
+			{
+				found_myself = LLL_TRUE;
+				break;
+			}
+			if (entry->next)
+			{
+				entry = entry->next;
+			}
+			else
+			{
+				break;
+			}
+		}
+		if (found_myself)
+		{
+			entry->data = value;
+		}
+		else
+		{
+			if (hashtable->free_list)
+			{
+				entry->next = hashtable->free_list;
+				hashtable->free_list = entry->next->next_deleted;
+			}
+			else
+			{
+				entry->next = lll_arena_alloc(&hashtable->entries_arena, sizeof(union lll_ht_entry), 8);
+			}
+			entry = entry->next;
+			entry->data = value;
+			entry->next = NULL;
+			entry->hash = key;
+		}
+	}
 }
 
-void*	lll_ht_get(lll_ht* hashtable,
-				   lll_string key)
+void*	lll_ht_remove(lll_ht* hashtable, lll_u32 key)
 {
-	(void) hashtable;
-	(void) key;
-	return NULL;
+	void*	result = NULL;
+	union lll_ht_entry* entry = hashtable->entries + (key % hashtable->capacity);
+	if (entry->is_occupied)
+	{
+		if (entry->hash == key)
+		{
+			result = entry->data;
+			if (entry->next)
+			{
+				union lll_ht_entry* next = entry->next;
+				*entry = *next;
+				next->is_occupied = LLL_FALSE;
+				next->next_deleted = hashtable->free_list;
+				hashtable->free_list = next;
+			}
+			else
+			{
+				entry->is_occupied = LLL_FALSE;
+				entry->next_deleted = NULL;
+			}
+		}
+		else
+		{
+			union lll_ht_entry* entry_previous = entry;
+			entry = entry->next;
+			while (entry)
+			{
+				if (entry->hash == key)
+				{
+					result = entry->data;
+					entry_previous->next = entry->next;
+					entry->is_occupied = LLL_FALSE;
+					entry->next_deleted = hashtable->free_list;
+					hashtable->free_list = entry;
+					break;
+				}
+				entry_previous = entry;
+				entry = entry->next;
+			}
+		}
+	}
+	return result;
 }
 
-void*	lll_ht_remove(lll_ht* hashtable,
-					  lll_string key)
+void**	lll_ht_get(lll_ht* hashtable, lll_u32 key)
 {
-	(void) hashtable;
-	(void) key;
-	return NULL;
+	void**	result = NULL;
+	union lll_ht_entry* entry = hashtable->entries + (key % hashtable->capacity);
+	if (entry->is_occupied)
+	{
+		while (LLL_TRUE)
+		{
+			if (entry->hash == key)
+			{
+				result = &entry->data;
+				break;
+			}
+			if (entry->next)
+			{
+				entry = entry->next;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+	return result;
 }
 
+void		lll_ht_clear(lll_ht* hashtable)
+{
+	lll_memset(hashtable->entries, sizeof(union lll_ht_entry) * hashtable->capacity, 0);
+	hashtable->free_list = NULL;
+	lll_arena_clear(&hashtable->entries_arena);
+}
+
+lll_u32	lll_hash_string(lll_string string)
+{
+	lll_u32 seed = 5381;
+	for (lll_u32 i = 0; i < string.length; i++)
+	{
+		seed = ((seed << 5) + seed) + *string.data;
+		string.data++;
+	}
+	return seed;
+}
