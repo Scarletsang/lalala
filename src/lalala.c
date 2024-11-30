@@ -60,6 +60,15 @@ void	lll_memcpy(void* dest, void* src, lll_u32 size)
 	}
 }
 
+void	lll_memset(void* dest, lll_u32 size, char data)
+{
+	for (lll_u32 i = 0; i < size; i++)
+	{
+		*(char*) dest = data;
+		dest++;
+	}
+}
+
 lll_b8	lll_arena_init(lll_arena* arena, lll_u32 size)
 {
 	arena->memory = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
