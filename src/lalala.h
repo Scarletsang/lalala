@@ -13,11 +13,7 @@ typedef char			lll_i8;
 typedef unsigned char	lll_b8;
 typedef unsigned char	lll_u8;
 typedef long			lll_u64;
-#ifdef LLL_32_BIT_POINTER
 typedef lll_u32			lll_ptr;
-#else
-typedef lll_u64			lll_ptr;
-#endif
 
 #ifdef DEBUG
 void	lll_assert_explicit(lll_b8 check, const char* message, int line_number, const char* function_name, const char* file_name);
@@ -59,10 +55,8 @@ typedef lll_u32	lll_arena_snapshot;
 
 lll_b8	lll_arena_init(lll_arena* arena, lll_u32 size);
 void	lll_arena_split(lll_arena* arena, lll_u32 size, lll_arena* output);
-void*	lll_arena_alloc(lll_arena* arena, lll_u32 size, lll_b8 is_alligned);
-
-#define lll_arena_alloc_type(arena, type) ((type*) lll_arena_alloc(arena, sizeof(type), LLL_TRUE))
-
+void*	lll_arena_alloc(lll_arena* arena, lll_u32 size, lll_u32 alignment);
+void	lll_arena_clear(lll_arena* arena);
 lll_arena_snapshot	lll_arena_cheese(lll_arena* arena);
 void	lll_arena_rollback(lll_arena* arena, lll_arena_snapshot snapshot);
 

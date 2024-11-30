@@ -63,6 +63,7 @@ void	lll_memcpy(void* dest, void* src, lll_u32 size)
 lll_b8	lll_arena_init(lll_arena* arena, lll_u32 size)
 {
 	arena->memory = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	lll_assert(arena->memory, "mmap failed");
 	arena->capacity = size;
 	arena->used = 0;
 	return (arena->memory != ((void*) -1));
@@ -70,26 +71,29 @@ lll_b8	lll_arena_init(lll_arena* arena, lll_u32 size)
 
 void	lll_arena_split(lll_arena* arena, lll_u32 size, lll_arena* output)
 {
-	output->memory = lll_arena_alloc(arena, size, LLL_TRUE);
+	output->memory = lll_arena_alloc(arena, size, 1);
 	output->used = 0;
 	output->capacity = size;
 }
 
-void*	lll_arena_alloc(lll_arena* arena, lll_u32 size, lll_b8 is_alligned)
+void*	lll_arena_alloc(lll_arena* arena, lll_u32 size, lll_u32 alignment)
 {
-	lll_assert((arena->memory + arena->used + size) > (arena->memory + arena->capacity), "Arena cannot fit to requested size of memory");
-	if (is_alligned)
-	{
-#ifdef LLL_32_BIT_POINTER
-		lll_u32	word_size = 4;
-#else
-		lll_u32	word_size = 8;
-#endif
-		size += size % word_size;
-	}
+	lll_assert(((alignment & (alignment - 1)) == 0), "Alignment is not power of two");
 	void*	result = arena->memory + arena->used;
+	lll_u64 modulo = (lll_u64)result & (alignment - 1);
+	if (modulo != 0)
+	{
+		result += (alignment - modulo);
+		size += (alignment - modulo);
+	}
+	lll_assert((arena->used + size) <= (arena->capacity), "Arena overflow");
 	arena->used += size;
 	return result;
+}
+
+void	lll_arena_clear(lll_arena* arena)
+{
+	arena->used = 0;
 }
 
 lll_arena_snapshot	lll_arena_cheese(lll_arena* arena)
