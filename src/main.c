@@ -149,15 +149,11 @@ lll_b8	lll_tokenize(lll_string* input, lll_token* output)
 	return LLL_TRUE;
 }
 
-struct app_entry
-{
-	lll_b8		is_deleted;
-	lll_string	string;
-};
-
 int main(void)
 {
+#if DEBUG
 	lll_sprintf_test();
+#endif
 	lll_b8		quit = LLL_FALSE;
 	lll_b8		syntax_error = LLL_FALSE;
 	lll_token	token;
@@ -169,7 +165,7 @@ int main(void)
 		(void) !write(STDOUT_FILENO, "Failed to allocate memory", sizeof("Failed to allocate memory") - 1);
 		return 1;
 	}
-	lll_ht_init(&hashtable, sizeof(struct app_entry), 1024, &arena);
+	lll_ht_init(&hashtable, 256, 256);
 	while (!quit)
 	{
 		syntax_error = LLL_FALSE;
@@ -192,16 +188,22 @@ int main(void)
 		{
 			if (lll_string_is_equal(token, lll_cstring("help")))
 			{
-				lll_printf("Avaliable hashtable commands:\nget    <key>\nset    <key> <string>\nremove <key>\n");
+				lll_printf("Avaliable hashtable commands:\nget    <key>\nset    <key> <string>\nremove <key>\nclear\n");
+			}
+			else if (lll_string_is_equal(token, lll_cstring("clear")))
+			{
+				lll_ht_clear(&hashtable);
+				lll_arena_clear(&arena);
+				lll_printf("cleared hashtable\n");
 			}
 			else if (lll_string_is_equal(token, lll_cstring("get")))
 			{
 				if (lll_tokenize(&user_input, &token))
 				{
-					struct app_entry* entry = lll_ht_get(&hashtable, token);
-					if (entry)
+					lll_string** value = (lll_string**) lll_ht_get(&hashtable, lll_hash_string(token));
+					if (value)
 					{
-						lll_printf("Found by key '%.*s': '%.*s'\n", token.length, token.data, entry->string.length, entry->string.data);
+						lll_printf("Found by key '%.*s': '%.*s'\n", token.length, token.data, (*value)->length, (*value)->data);
 					}
 					else
 					{
@@ -218,15 +220,12 @@ int main(void)
 				lll_token	parameter_2;
 				if (lll_tokenize(&user_input, &token) && lll_tokenize(&user_input, &parameter_2))
 				{
-					struct app_entry* entry = lll_ht_set(&hashtable, token, &parameter_2);
-					if (entry)
-					{
-						lll_printf("Set entry using key '%.*s': '%.*s'\n", token.length, token.data, entry->string.length, entry->string.data);
-					}
-					else
-					{
-						lll_printf("Cannot set entry by key '%.*s'\n", token.length, token.data);
-					}
+					lll_string*	data = lll_arena_alloc(&arena, sizeof(lll_string) + parameter_2.length, 8);
+					data->data = (char*) (data + 1);
+					data->length = parameter_2.length;
+					lll_memcpy(data->data, parameter_2.data, parameter_2.length);
+					lll_ht_set(&hashtable, lll_hash_string(token), data);
+					lll_printf("Set entry using key '%.*s': '%.*s'\n", token.length, token.data, data->length, data->data);
 				}
 				else
 				{
@@ -237,10 +236,10 @@ int main(void)
 			{
 				if (lll_tokenize(&user_input, &token))
 				{
-					struct app_entry* entry = lll_ht_get(&hashtable, token);
-					if (entry)
+					lll_string* value = lll_ht_remove(&hashtable, lll_hash_string(token));
+					if (value)
 					{
-						lll_printf("Removed entry using key '%.*s': '%.*s'\n", token.length, token.data, entry->string.length, entry->string.data);
+						lll_printf("Removed entry using key '%.*s': '%.*s'\n", token.length, token.data, value->length, value->data);
 					}
 					else
 					{
@@ -259,6 +258,7 @@ int main(void)
 			else
 			{
 				lll_printf("Error: invalid command\n");
+				lll_printf("Avaliable hashtable commands:\nget    <key>\nset    <key> <string>\nremove <key>\nclear\n");
 			}
 			if (syntax_error)
 			{
