@@ -665,7 +665,7 @@ lll_u32	lll_fdprintf(int fd, const char* format, ...)
 lll_b8	lll_arena_init(lll_arena* arena, lll_u32 size)
 {
 	arena->memory = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	lll_assert(arena->memory, "mmap failed");
+	lll_assert((arena->memory != NULL), "mmap failed");
 	arena->capacity = size;
 	arena->used = 0;
 	return (arena->memory != ((void*) -1));
