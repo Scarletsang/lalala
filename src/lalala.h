@@ -7,13 +7,12 @@
 #define LLL_INVALID_SIZE	((lll_u32) -1)
 #define LLL_PAGE_SIZE	(4096)
 
-typedef unsigned int	lll_u32;
-typedef int				lll_i32;
-typedef char			lll_i8;
-typedef unsigned char	lll_b8;
-typedef unsigned char	lll_u8;
-typedef long			lll_u64;
-typedef lll_u32			lll_ptr;
+typedef unsigned int  lll_u32;
+typedef int           lll_i32;
+typedef char          lll_i8;
+typedef unsigned char lll_b8;
+typedef unsigned char lll_u8;
+typedef long          lll_u64;
 
 #ifdef DEBUG
 void	lll_assert_explicit(lll_b8 check, const char* message, int line_number, const char* function_name, const char* file_name);
