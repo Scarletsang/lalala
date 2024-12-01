@@ -1,0 +1,2 @@
+CompileFlags:
+  Add: [-DLALALA_IMPLEMENTATION=1, -DDEBUG=1, -xc]
